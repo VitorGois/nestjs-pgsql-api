@@ -6,16 +6,17 @@ import {
   ConflictException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { CreateUserDto } from './dtos';
-import { UserRole } from './enums';
+import { UserCreateDto } from './user.dto';
+import { UserRole } from './user.enum';
+import { AuthLoginDto } from 'src/auth/auth.dto';
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
-  async createUser(
-    createUserDto: CreateUserDto,
+  public async createUser(
+    UserCreateDto: UserCreateDto,
     role: UserRole,
   ): Promise<User> {
-    const { email, name, password } = createUserDto;
+    const { email, name, password } = UserCreateDto;
 
     const user = this.create();
     user.email = email;
@@ -32,13 +33,23 @@ export class UserRepository extends Repository<User> {
       delete user.salt;
       return user;
     } catch (error) {
-      if (error.code.toString() === '23505') {
-        throw new ConflictException('Endereço de email já está em uso');
+      const uniqueConstraintViolatedPgCode = '23505';
+      if (error.code.toString() === uniqueConstraintViolatedPgCode) {
+        throw new ConflictException('Email address already in use');
       } else {
-        throw new InternalServerErrorException(
-          'Erro ao salvar o usuário no banco de dados',
-        );
+        throw new InternalServerErrorException('Error saving user to database');
       }
+    }
+  }
+
+  public async checkCredentials(userCredentials: AuthLoginDto): Promise<User> {
+    const { email, password } = userCredentials;
+    const user = await this.findOne({ email, status: true });
+
+    if (user && (await user.checkPassword(password))) {
+      return user;
+    } else {
+      return null;
     }
   }
 
