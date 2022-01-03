@@ -10,6 +10,7 @@ import { User } from 'src/user/user.entity';
 import { UserRepository } from 'src/user/user.repository';
 import { AuthLoginDto } from './auth.dto';
 import { JwtService } from '@nestjs/jwt';
+import { JwtPayload } from './auth.interface/auth.jwt.payload';
 
 @Injectable()
 export class AuthService {
@@ -40,7 +41,7 @@ export class AuthService {
 
     const jwtPayload = {
       id: user.id,
-    };
+    } as JwtPayload;
     const token = this.jwtService.sign(jwtPayload);
 
     return { token };
