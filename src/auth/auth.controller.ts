@@ -1,5 +1,5 @@
 import { Body, Controller, Post, ValidationPipe } from '@nestjs/common';
-import { CreateUserDto } from 'src/user/dtos';
+import { UserCreateDto } from 'src/user/user.dto';
 import { AuthService } from './auth.service';
 
 @Controller('auth')
@@ -8,12 +8,12 @@ export class AuthController {
 
   @Post('signup')
   public async signUp(
-    @Body(ValidationPipe) createUserDto: CreateUserDto,
+    @Body(ValidationPipe) userCreateDto: UserCreateDto,
   ): Promise<{ message: string }> {
-    await this.authService.signUp(createUserDto);
+    await this.authService.signUp(userCreateDto);
 
     return {
-      message: 'Cadastro realizado com sucesso',
+      message: 'Successfully user signup',
     };
   }
 }
