@@ -5,8 +5,9 @@ import {
   ValidationPipe,
   UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { Role } from 'src/auth/auth.decorators';
-import { JwtAuthGuard, RolesGuard } from 'src/auth/auth.guards';
+import { RolesGuard } from 'src/auth/auth.guards';
 import { UserCreateDto, UserResponseDto } from './user.dto';
 import { UserRole } from './user.enum';
 import { UserService } from './user.service';
@@ -17,7 +18,7 @@ export class UserController {
 
   @Post()
   @Role(UserRole.ADMIN)
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(AuthGuard(), RolesGuard)
   async createAdminUser(
     @Body(ValidationPipe) userCreateDto: UserCreateDto,
   ): Promise<UserResponseDto> {
