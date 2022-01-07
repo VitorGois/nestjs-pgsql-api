@@ -42,7 +42,11 @@ export class UserRepository extends Repository<User> {
     }
   }
 
-  public async findUsers(queryDto: FindUserQueryDto): Promise<UsersFoundDto> {
+  private async hashPassword(password: string, salt: string): Promise<string> {
+    return bcrypt.hash(password, salt);
+  }
+
+  public async findUsersFilterWithPagination(queryDto: FindUserQueryDto): Promise<UsersFoundDto> {
     queryDto.status = queryDto.status || true;
     queryDto.page = queryDto.page < 1 ? 1 : queryDto.page;
     queryDto.limit = queryDto.limit > 100 ? 100 : queryDto.limit;
@@ -84,7 +88,4 @@ export class UserRepository extends Repository<User> {
     }
   }
 
-  private async hashPassword(password: string, salt: string): Promise<string> {
-    return bcrypt.hash(password, salt);
-  }
 }

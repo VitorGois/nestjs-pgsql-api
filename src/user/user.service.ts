@@ -55,7 +55,7 @@ export class UserService {
   }
 
   public async findUsers(queryDto: FindUserQueryDto): Promise<UsersFoundDto> {
-    const users = await this.userRepository.findUsers(queryDto);
+    const users = await this.userRepository.findUsersFilterWithPagination(queryDto);
     return users;
   }
 }
