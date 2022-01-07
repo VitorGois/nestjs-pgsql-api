@@ -18,7 +18,7 @@ import { AuthService } from './auth.service';
 
 @Controller('auth')
 export class AuthController {
-  public constructor(private readonly authService: AuthService) {}
+  public constructor(private readonly authService: AuthService) { }
 
   @Post('signup')
   public async signUp(
@@ -42,6 +42,16 @@ export class AuthController {
   @HttpCode(200)
   public async confirmEmail(@Param('token') token: string): Promise<void> {
     await this.authService.confirmEmail(token);
+  }
+
+  @Post('send-recover-email')
+  public async sendRecoverPasswordEmail(
+    @Body('email') email: string,
+  ): Promise<{ message: string }> {
+    await this.authService.sendRecoverPasswordEmail(email);
+    return { 
+      message: 'Email has sent with password recovery steps'
+    }
   }
 
   @Get('profile')

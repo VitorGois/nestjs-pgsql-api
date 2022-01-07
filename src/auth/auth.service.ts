@@ -15,6 +15,7 @@ import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './auth.interface/auth.jwt.payload';
 import { MailService } from 'src/mail/mail.service';
 import { Logger } from 'winston';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -68,5 +69,20 @@ export class AuthService {
     );
 
     if (result.affected === 0) throw new NotFoundException('Invalid token');
+  }
+
+  public async sendRecoverPasswordEmail(email: string): Promise<void> {
+    const user = await this.userRepository.findOne({ email });
+
+    if (!user) throw new NotFoundException('User not found');
+
+    user.recoverToken = crypto.randomBytes(32).toString('hex');
+    await user.save();
+
+    try {
+      await this.mailService.sendRecoverPasswordMail(user);
+    } catch (err) {
+      this.logger.warn('Failed to send recover password mail\n', err);
+    }
   }
 }
