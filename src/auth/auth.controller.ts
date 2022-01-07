@@ -68,6 +68,22 @@ export class AuthController {
     };
   }
 
+  @Patch(':id/change-password')
+  @UseGuards(AuthGuard())
+  async changePassword(
+    @Param('id') id: string,
+    @Body(ValidationPipe) changePasswordDto: ChangePasswordDto,
+    @GetUser() user: User,
+  ) {
+    if (user.role !== UserRole.ADMIN && user.id.toString() !== id)
+      throw new UnauthorizedException('Unauthorized to access this feature.');
+
+    await this.authService.changePassword(id, changePasswordDto);
+    return {
+      message: 'Password changed',
+    };
+  }
+
   @Get('profile')
   @UseGuards(AuthGuard())
   getMe(@GetUser() user: User): User {
