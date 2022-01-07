@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { UserRole } from './user.enum';
 
 @Entity()
 @Unique(['email'])
@@ -22,7 +23,7 @@ export class User extends BaseEntity {
   name: string;
 
   @Column({ nullable: false, type: 'varchar', length: 20 })
-  role: string;
+  role: UserRole;
 
   @Column({ nullable: false, default: true })
   status: boolean;
