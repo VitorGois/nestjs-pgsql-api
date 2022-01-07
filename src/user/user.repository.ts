@@ -42,10 +42,6 @@ export class UserRepository extends Repository<User> {
     }
   }
 
-  private async hashPassword(password: string, salt: string): Promise<string> {
-    return bcrypt.hash(password, salt);
-  }
-
   public async findUsersFilterWithPagination(queryDto: FindUserQueryDto): Promise<UsersFoundDto> {
     queryDto.status = queryDto.status || true;
     queryDto.page = queryDto.page < 1 ? 1 : queryDto.page;
@@ -75,6 +71,18 @@ export class UserRepository extends Repository<User> {
     const [users, total] = await query.getManyAndCount();
 
     return { users, total };
+  }
+
+  public async changePassword(id: string, password: string): Promise<void> {
+    const user = await this.findOne(id);
+    user.salt = await bcrypt.genSalt();
+    user.password = await this.hashPassword(password, user.salt);
+    user.recoverToken = null;
+    await user.save();
+  }
+
+  private async hashPassword(password: string, salt: string): Promise<string> {
+    return bcrypt.hash(password, salt);
   }
 
   public async checkCredentials(userCredentials: AuthLoginDto): Promise<User> {

@@ -12,9 +12,11 @@ export class UserCreateDto {
 
   @IsNotEmpty()
   @MinLength(5)
+  @MaxLength(32)
   public password: string;
 
   @IsNotEmpty()
   @MinLength(5)
+  @MaxLength(32)
   public passwordConfirmation: string;
 }

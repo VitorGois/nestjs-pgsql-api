@@ -10,7 +10,7 @@ import { UserCreateDto } from 'src/user/user.dto';
 import { UserRole } from 'src/user/user.enum';
 import { User } from 'src/user/user.entity';
 import { UserRepository } from 'src/user/user.repository';
-import { AuthLoginDto } from './auth.dto';
+import { AuthLoginDto, ChangePasswordDto } from './auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './auth.interface/auth.jwt.payload';
 import { MailService } from 'src/mail/mail.service';
@@ -61,7 +61,6 @@ export class AuthService {
     return { token };
   }
 
-
   public async confirmEmail(confirmationToken: string): Promise<void> {
     const result = await this.userRepository.update(
       { confirmationToken },
@@ -84,5 +83,32 @@ export class AuthService {
     } catch (err) {
       this.logger.warn('Failed to send recover password mail\n', err);
     }
+  }
+
+  public async resetPassword(recoverToken: string, changePasswordDto: ChangePasswordDto): Promise<void> {
+    const user = await this.userRepository.findOne(
+      { recoverToken },
+      { select: ['id'] },
+    );
+
+    if (!user) throw new NotFoundException('Invalid token');
+
+    try {
+      await this.changePassword(user.id.toString(), changePasswordDto);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  public async changePassword(
+    id: string,
+    changePasswordDto: ChangePasswordDto,
+  ): Promise<void> {
+    const { password, passwordConfirmation } = changePasswordDto;
+
+    if (password != passwordConfirmation)
+      throw new UnprocessableEntityException('Password do not match');
+
+    await this.userRepository.changePassword(id, password);
   }
 }

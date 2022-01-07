@@ -6,14 +6,16 @@ import {
   Param,
   Patch,
   Post,
+  UnauthorizedException,
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { UserCreateDto } from 'src/user/user.dto';
 import { User } from 'src/user/user.entity';
+import { UserRole } from 'src/user/user.enum';
 import { GetUser } from './auth.decorators';
-import { AuthLoginDto } from './auth.dto';
+import { AuthLoginDto, ChangePasswordDto } from './auth.dto';
 import { AuthService } from './auth.service';
 
 @Controller('auth')
@@ -49,9 +51,21 @@ export class AuthController {
     @Body('email') email: string,
   ): Promise<{ message: string }> {
     await this.authService.sendRecoverPasswordEmail(email);
-    return { 
+    return {
       message: 'Email has sent with password recovery steps'
     }
+  }
+
+  @Patch('/reset-password/:token')
+  public async resetPassword(
+    @Param('token') token: string,
+    @Body(ValidationPipe) changePasswordDto: ChangePasswordDto,
+  ): Promise<{ message: string }> {
+    await this.authService.resetPassword(token, changePasswordDto);
+
+    return {
+      message: 'Password has been reset successfully',
+    };
   }
 
   @Get('profile')
