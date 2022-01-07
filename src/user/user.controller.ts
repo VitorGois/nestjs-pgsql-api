@@ -8,6 +8,7 @@ import {
   Patch,
   ValidationPipe,
   ForbiddenException,
+  Delete,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser, Role } from 'src/auth/auth.decorators';
@@ -56,5 +57,12 @@ export class UserController {
     } else {
       return this.usersService.updateUser(userUpdateDto, id);
     }
+  }
+
+  @Delete(':id')
+  public async deleteUser(@Param('id') id: string): Promise<{ message: string; }> {
+    await this.usersService.deleteUser(id);
+    
+    return { message: 'User removed successfully'}
   }
 }
