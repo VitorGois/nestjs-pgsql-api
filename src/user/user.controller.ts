@@ -2,22 +2,25 @@ import {
   Controller,
   Post,
   Body,
-  ValidationPipe,
   UseGuards,
   Get,
   Param,
+  Patch,
+  ValidationPipe,
+  ForbiddenException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { Role } from 'src/auth/auth.decorators';
+import { GetUser, Role } from 'src/auth/auth.decorators';
 import { RolesGuard } from 'src/auth/auth.guards';
-import { UserCreateDto, UserResponseDto } from './user.dto';
+import { UserCreateDto, UserResponseDto, UserUpdateDto } from './user.dto';
+import { User } from './user.entity';
 import { UserRole } from './user.enum';
 import { UserService } from './user.service';
 
 @Controller('users')
 @UseGuards(AuthGuard(), RolesGuard)
 export class UserController {
-  public constructor(private usersService: UserService) {}
+  public constructor(private usersService: UserService) { }
 
   @Post()
   @Role(UserRole.ADMIN)
@@ -39,5 +42,19 @@ export class UserController {
       user,
       message: 'User found',
     };
+  }
+
+  @Patch(':id')
+  public async updateUser(
+    @Body(ValidationPipe) userUpdateDto: UserUpdateDto, 
+    @GetUser() user: User, // extract from token
+    @Param('id') id: string
+  ): Promise<User> {
+    console.log(JSON.stringify(user));
+    if (user.role !== UserRole.ADMIN && user.id.toString() !== id) {
+      throw new ForbiddenException('Unauthorized to access this feature.')
+    } else {
+      return this.usersService.updateUser(userUpdateDto, id);
+    }
   }
 }
