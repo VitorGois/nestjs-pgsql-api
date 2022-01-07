@@ -4,17 +4,17 @@ export class UserCreateDto {
   @IsNotEmpty()
   @IsEmail()
   @MaxLength(200)
-  email: string;
+  public email: string;
 
   @IsNotEmpty()
   @MaxLength(200)
-  name: string;
+  public name: string;
 
   @IsNotEmpty()
   @MinLength(5)
-  password: string;
+  public password: string;
 
   @IsNotEmpty()
   @MinLength(5)
-  passwordConfirmation: string;
+  public passwordConfirmation: string;
 }
