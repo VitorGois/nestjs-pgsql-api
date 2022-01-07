@@ -15,10 +15,10 @@ export const winstonConfig: WinstonModuleOptions = {
         nestWinstonModuleUtilities.format.nestLike(),
       ),
     }),
-    new winston.transports.File({
-      level: 'verbose',
-      filename: 'application.log',
-      dirname: 'logs',
-    }),
+    // new winston.transports.File({
+    //   level: 'verbose',
+    //   filename: 'application.log',
+    //   dirname: 'logs',
+    // }),
   ],
 };
