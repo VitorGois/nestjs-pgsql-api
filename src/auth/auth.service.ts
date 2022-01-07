@@ -1,4 +1,5 @@
 import {
+  Inject,
   Injectable,
   UnauthorizedException,
   UnprocessableEntityException,
@@ -11,14 +12,17 @@ import { UserRepository } from 'src/user/user.repository';
 import { AuthLoginDto } from './auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './auth.interface/auth.jwt.payload';
+import { MailService } from 'src/mail/mail.service';
+import { Logger } from 'winston';
 
 @Injectable()
 export class AuthService {
   public constructor(
-    @InjectRepository(UserRepository)
-    private readonly userRepository: UserRepository,
+    @InjectRepository(UserRepository) private readonly userRepository: UserRepository,
+    @Inject('winston') private readonly logger: Logger,
     private readonly jwtService: JwtService,
-  ) {}
+    private readonly mailService: MailService,
+  ) { }
 
   public async signUp(UserCreateDto: UserCreateDto): Promise<User> {
     const { password, passwordConfirmation } = UserCreateDto;
@@ -26,7 +30,15 @@ export class AuthService {
     if (password !== passwordConfirmation) {
       throw new UnprocessableEntityException('Passwords do not match');
     } else {
-      return this.userRepository.createUser(UserCreateDto, UserRole.USER);
+      const user = await this.userRepository.createUser(UserCreateDto, UserRole.USER);
+
+      try {
+        await this.mailService.sendConfirmationMail(user);
+      } catch (err) {
+        this.logger.warn('Failed to send confirmation mail\n', err);
+      }
+
+      return user;
     }
   }
 
