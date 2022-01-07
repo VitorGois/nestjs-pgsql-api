@@ -2,6 +2,9 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
+  Param,
+  Patch,
   Post,
   UseGuards,
   ValidationPipe,
@@ -33,6 +36,12 @@ export class AuthController {
     @Body(ValidationPipe) userLoginDto: AuthLoginDto,
   ): Promise<{ token: string }> {
     return this.authService.signIn(userLoginDto);
+  }
+
+  @Patch(':token')
+  @HttpCode(200)
+  public async confirmEmail(@Param('token') token: string): Promise<void> {
+    await this.authService.confirmEmail(token);
   }
 
   @Get('profile')
