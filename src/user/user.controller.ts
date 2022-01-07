@@ -9,11 +9,12 @@ import {
   ValidationPipe,
   ForbiddenException,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser, Role } from 'src/auth/auth.decorators';
 import { RolesGuard } from 'src/auth/auth.guards';
-import { UserCreateDto, UserResponseDto, UserUpdateDto } from './user.dto';
+import { FindUserQueryDto, UserCreateDto, UserResponseDto, UsersFoundDto, UserUpdateDto } from './user.dto';
 import { User } from './user.entity';
 import { UserRole } from './user.enum';
 import { UserService } from './user.service';
@@ -64,5 +65,11 @@ export class UserController {
     await this.usersService.deleteUser(id);
     
     return { message: 'User removed successfully'}
+  }
+
+  @Get()
+  @Role(UserRole.ADMIN)
+  public async findUsers(@Query() query: FindUserQueryDto): Promise<UsersFoundDto> {
+    return this.usersService.findUsers(query);
   }
 }

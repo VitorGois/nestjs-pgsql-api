@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserCreateDto, UserUpdateDto } from './user.dto';
+import { FindUserQueryDto, UserCreateDto, UsersFoundDto, UserUpdateDto } from './user.dto';
 import { UserRole } from './user.enum';
 import { User } from './user.entity';
 import { UserRepository } from './user.repository';
@@ -52,5 +52,10 @@ export class UserService {
     if (result.affected === 0) {
       throw new NotFoundException('User not found with given id');
     }
+  }
+
+  public async findUsers(queryDto: FindUserQueryDto): Promise<UsersFoundDto> {
+    const users = await this.userRepository.findUsers(queryDto);
+    return users;
   }
 }
