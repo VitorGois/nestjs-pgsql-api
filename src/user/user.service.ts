@@ -10,7 +10,7 @@ export class UserService {
   public constructor(
     @InjectRepository(UserRepository)
     private readonly userRepository: UserRepository,
-  ) {}
+  ) { }
 
   public async createAdminUser(UserCreateDto: UserCreateDto): Promise<User> {
     if (UserCreateDto.password != UserCreateDto.passwordConfirmation) {
@@ -22,7 +22,7 @@ export class UserService {
 
   public async findUserById(userId: string): Promise<User> {
     const user = await this.userRepository.findOne(userId, {
-      select: [ 'email', 'name', 'role', 'id']
+      select: ['email', 'name', 'role', 'id']
     });
 
     if (!user) throw new NotFoundException('User not found');
@@ -31,17 +31,17 @@ export class UserService {
   }
 
   public async updateUser(userUpdateDto: UserUpdateDto, id: string): Promise<User> {
-    const user = await this.findUserById(id);
-    const { name, role, status } = userUpdateDto;
-
-    user.name = name || user.name;
-    user.role = role || user.role;
-    user.status = status || user.status;
-
-    try { 
-      await user.save();
-      return user;
+    try {
+      const result = await this.userRepository.update({ id }, userUpdateDto);
+      console.log(result);
+      if (result.affected > 0) {
+        const user = await this.findUserById(id);
+        return user;
+      } else {
+        throw new NotFoundException('User not found');
+      }
     } catch (err) {
+      if (err instanceof NotFoundException) throw err;
       throw new InternalServerErrorException('Error saving data to database');
     }
   }
